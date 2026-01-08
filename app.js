@@ -113,6 +113,8 @@ function fichePopupHTML(d) {
   const capacite = (d.capacite_accueil ?? "-");
   const med = (d.nb_medecins ?? "-");
   const inf = (d.nb_infirmiers ?? "-");
+  const sageFemmes = (d.nb_sage_femmes ?? 0);
+  const commune = d.commune || "";
   const constat = d.constat || "—";
 
   if (d.kind === "essp") {
@@ -136,20 +138,30 @@ function fichePopupHTML(d) {
               <span class="font-semibold text-right">${nom}</span>
             </div>
 
+            ${commune ? `<div class="flex items-center justify-between gap-3">
+              <span class="text-white/70">Commune</span>
+              <span class="font-semibold text-right">${commune}</span>
+            </div>` : ''}
+
             <div class="flex items-center justify-between gap-3">
-              <span class="text-white/70">Capacité d’accueil</span>
+              <span class="text-white/70">Capacité d'accueil</span>
               <span class="font-semibold">${capacite}</span>
             </div>
 
             <div class="flex items-center justify-between gap-3">
-              <span class="text-white/70">Nombre médecins</span>
+              <span class="text-white/70">👨‍⚕️ Médecins</span>
               <span class="font-semibold">${med}</span>
             </div>
 
             <div class="flex items-center justify-between gap-3">
-              <span class="text-white/70">Nombre infirmiers</span>
+              <span class="text-white/70">👩‍⚕️ Infirmiers</span>
               <span class="font-semibold">${inf}</span>
             </div>
+
+            ${sageFemmes > 0 ? `<div class="flex items-center justify-between gap-3">
+              <span class="text-white/70">🤱 Sages-femmes</span>
+              <span class="font-semibold">${sageFemmes}</span>
+            </div>` : ''}
           </div>
         </div>
 
@@ -2682,9 +2694,16 @@ function renderStatsPrefecture() {
         </div>
       </div>`;
     } else if (AppState.selectedSector === "sante") {
-      // Fallback for sante since we don't have strict province stats in data.json
-      // We can use TARFAYA_DATA details or placeholders
-      const dSan = { hopitaux: 1, essp: 7, ambulances: 10, lits: 70 }; // Default as before
+      const dSante = provinceStats.sante || {};
+
+      // Calculate totals
+      const totalESSP = parseNumber(dSante["ESSP"]) || 8;
+      const totalAmbulances = parseNumber(dSante["Nombre d'ambulances"]) || 10;
+      const dispensaire = parseNumber(dSante["Nombre Dispensaire"]) || 0;
+      const csr1 = parseNumber(dSante["Nombre CSR 1"]) || 0;
+      const csu1 = parseNumber(dSante["Nombre CSU 1"]) || 0;
+      const csu2 = parseNumber(dSante["Nombre CSU 2"]) || 0;
+      const chp = parseNumber(dSante["Nombre CHP"]) || 0;
 
       leftPanel.innerHTML = `
       <div class="panel-card text-white">
@@ -2693,11 +2712,50 @@ function renderStatsPrefecture() {
           <span class="badge-chip"><span class="badge-dot" style="background:#ef4444;"></span> Santé</span>
         </div>
         <div class="panel-body">
+           <div class="kpi-grid mb-4">
+              <div class="kpi"><div class="kpi-top"><div><div class="kpi-label">ESSP</div><div class="kpi-value">${totalESSP}</div></div><div class="kpi-ico"><i class="fa-solid fa-hospital"></i></div></div></div>
+              <div class="kpi"><div class="kpi-top"><div><div class="kpi-label">Ambulances</div><div class="kpi-value">${totalAmbulances}</div></div><div class="kpi-ico"><i class="fa-solid fa-truck-medical"></i></div></div></div>
+              <div class="kpi"><div class="kpi-top"><div><div class="kpi-label">Couverture</div><div class="kpi-value" style="font-size:11px;">${dSante["Taux de couverture sanitaire (Nbre centres/habitants)"] || "—"}</div></div><div class="kpi-ico"><i class="fa-solid fa-shield-heart"></i></div></div></div>
+           </div>
+           
+           <div style="margin-bottom:16px;">
+             <div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Établissements par type</div>
+             <table class="w-full text-sm">
+               <tbody style="font-size:12px;">
+                 <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td class="p-2">Dispensaire</td><td class="p-2 text-right font-semibold">${dispensaire}</td></tr>
+                 <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td class="p-2">CSR 1</td><td class="p-2 text-right font-semibold">${csr1}</td></tr>
+                 <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td class="p-2">CSU 1</td><td class="p-2 text-right font-semibold">${csu1}</td></tr>
+                 <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td class="p-2">CSU 2</td><td class="p-2 text-right font-semibold">${csu2}</td></tr>
+                 <tr><td class="p-2">CHP</td><td class="p-2 text-right font-semibold">${chp}</td></tr>
+               </tbody>
+             </table>
+           </div>
+
            <div class="kpi-grid">
-              <div class="kpi"><div class="kpi-top"><div><div class="kpi-label">Hôpitaux</div><div class="kpi-value">${dSan.hopitaux}</div></div><div class="kpi-ico"><i class="fa-solid fa-hospital"></i></div></div></div>
-              <div class="kpi"><div class="kpi-top"><div><div class="kpi-label">ESSP</div><div class="kpi-value">${dSan.essp}</div></div><div class="kpi-ico"><i class="fa-solid fa-house-medical"></i></div></div></div>
-              <div class="kpi"><div class="kpi-top"><div><div class="kpi-label">Ambulances</div><div class="kpi-value">${dSan.ambulances}</div></div><div class="kpi-ico"><i class="fa-solid fa-truck-medical"></i></div></div></div>
-              <div class="kpi"><div class="kpi-top"><div><div class="kpi-label">Lits</div><div class="kpi-value">${dSan.lits}</div></div><div class="kpi-ico"><i class="fa-solid fa-bed-pulse"></i></div></div></div>
+              <div class="kpi"><div class="kpi-top"><div><div class="kpi-label" style="font-size:10px;">Médecins/10k hab</div><div class="kpi-value" style="font-size:13px;">${dSante["Médecins généraliste pour 10 000 habitants"] || "—"}</div></div><div class="kpi-ico"><i class="fa-solid fa-user-doctor"></i></div></div></div>
+              <div class="kpi"><div class="kpi-top"><div><div class="kpi-label" style="font-size:10px;">Infirmiers/10k hab</div><div class="kpi-value" style="font-size:13px;">${dSante["Infirmiers pour 10 000 habitants"] || "—"}</div></div><div class="kpi-ico"><i class="fa-solid fa-user-nurse"></i></div></div></div>
+           </div>
+
+           <div style="margin-top:16px; padding:12px; background:rgba(239,68,68,0.1); border-radius:8px; border-left:3px solid #ef4444;">
+             <div style="font-size:10px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:6px;">INDICATEURS DE SANTÉ</div>
+             <div style="font-size:11px; line-height:1.6;">
+               <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                 <span>Accouchements surveillés</span>
+                 <span style="font-weight:600;">${(parseFloat(dSante["Taux d'accouchement surveillé en 2024"]) * 100).toFixed(1)}%</span>
+               </div>
+               <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                 <span>Mortalité périnatale</span>
+                 <span style="font-weight:600;">${(parseFloat(dSante["Taux de mortalité périnatale précoce"]) * 100).toFixed(2)}%</span>
+               </div>
+               <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                 <span>Mortalité infantile</span>
+                 <span style="font-weight:600;">${dSante["Taux de mortalité infantile"] || "0‰"}</span>
+               </div>
+               <div style="display:flex; justify-content:space-between;">
+                 <span>Mortalité maternelle</span>
+                 <span style="font-weight:600;">${dSante["Taux de mortalité maternelle"] || "0‰"}</span>
+               </div>
+             </div>
            </div>
         </div>
       </div>`;
@@ -2858,30 +2916,7 @@ function renderStatsCommune(communeName) {
   const masculin = data?.demo?.Masculin ? data.demo.Masculin + (typeof data.demo.Masculin === 'number' ? '%' : '') : "—";
   const feminin = data?.demo?.Féminin ? data.demo.Féminin + (typeof data.demo.Féminin === 'number' ? '%' : '') : "—";
 
-  if (AppState.selectedSector === "education") {
-    const edu = data?.edu || { prescolaire: {}, primaire: {}, college: {}, lycee: {} };
-    if (leftPanel) leftPanel.innerHTML = `
-      <div class="panel-card text-white">
-        <div class="panel-header">
-          <div><div class="panel-title">Éducation - ${communeName}</div></div>
-          <span class="badge-chip"><span class="badge-dot" style="background:#3b82f6;"></span> Éducation</span>
-        </div>
-        <div class="panel-body">
-           <table class="w-full text-sm text-center">
-             <thead><tr class="text-xs uppercase text-slate-400"><th class="text-left p-1">Cycle</th><th>Etab</th><th>F</th><th>G</th></tr></thead>
-             <tbody>
-               <tr><td class="text-left p-1">Pré.</td><td>${edu.prescolaire.etabs || 0}</td><td>${edu.prescolaire.filles || 0}</td><td>${edu.prescolaire.garcons || 0}</td></tr>
-               <tr><td class="text-left p-1">Prim.</td><td>${edu.primaire.etabs || 0}</td><td>${edu.primaire.filles || 0}</td><td>${edu.primaire.garcons || 0}</td></tr>
-               <tr><td class="text-left p-1">Col.</td><td>${edu.college.etabs || 0}</td><td>${edu.college.filles || 0}</td><td>${edu.college.garcons || 0}</td></tr>
-               <tr><td class="text-left p-1">Lyc.</td><td>${edu.lycee.etabs || 0}</td><td>${edu.lycee.filles || 0}</td><td>${edu.lycee.garcons || 0}</td></tr>
-             </tbody>
-           </table>
-        </div>
-      </div>`;
-    if (rightPanel) rightPanel.innerHTML = `<div class="panel-card text-white"><div class="panel-body"><div class="hint">Données de la Direction Provinciale.</div></div></div>`;
-    setText("headerSubTitle", "Commune : " + communeName);
-    return;
-  }
+
 
   if (AppState.selectedSector === "emploi") {
     const emp = data?.emp;
@@ -2905,6 +2940,14 @@ function renderStatsCommune(communeName) {
   }
 
   if (AppState.selectedSector === "sante") {
+    const sante = data?.sante || {};
+    const etabs = parseNumber(sante["Nombre d'établissements sanitaires"]) || 0;
+    const medecins = parseNumber(sante["Nombre de médcin"]) || 0;
+    const infirmiers = parseNumber(sante["Nombre d'infirmier"]) || 0;
+    const sageFemmes = parseNumber(sante["Nombre de sage femme"]) || 0;
+    const ambulances = parseNumber(sante["Nombre d'ambulances"]) || 0;
+    const litsAccouchement = parseNumber(sante["Nombre lit accouchement"]) || 0;
+
     if (leftPanel) leftPanel.innerHTML = `
       <div class="panel-card text-white">
         <div class="panel-header">
@@ -2912,10 +2955,81 @@ function renderStatsCommune(communeName) {
           <span class="badge-chip"><span class="badge-dot" style="background:#ef4444;"></span> Santé</span>
         </div>
         <div class="panel-body">
-           <div class="hint">Données détaillées non disponibles pour cette commune.</div>
+           <div class="kpi mb-4">
+             <div class="kpi-top">
+               <div>
+                 <div class="kpi-label">Établissements Sanitaires</div>
+                 <div class="kpi-value" style="font-size:24px;">${etabs}</div>
+               </div>
+               <div class="kpi-ico"><i class="fa-solid fa-hospital"></i></div>
+             </div>
+           </div>
+
+           <div style="margin-bottom:16px;">
+             <div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Personnel Médical</div>
+             <div class="kpi-grid">
+               <div class="kpi">
+                 <div class="kpi-top">
+                   <div>
+                     <div class="kpi-label" style="font-size:11px;">Médecins</div>
+                     <div class="kpi-value" style="font-size:18px;">${medecins}</div>
+                   </div>
+                   <div class="kpi-ico" style="background:rgba(59,130,246,0.15);"><i class="fa-solid fa-user-doctor" style="color:#3b82f6;"></i></div>
+                 </div>
+               </div>
+               <div class="kpi">
+                 <div class="kpi-top">
+                   <div>
+                     <div class="kpi-label" style="font-size:11px;">Infirmiers</div>
+                     <div class="kpi-value" style="font-size:18px;">${infirmiers}</div>
+                   </div>
+                   <div class="kpi-ico" style="background:rgba(16,185,129,0.15);"><i class="fa-solid fa-user-nurse" style="color:#10b981;"></i></div>
+                 </div>
+               </div>
+               <div class="kpi">
+                 <div class="kpi-top">
+                   <div>
+                     <div class="kpi-label" style="font-size:11px;">Sages-femmes</div>
+                     <div class="kpi-value" style="font-size:18px;">${sageFemmes}</div>
+                   </div>
+                   <div class="kpi-ico" style="background:rgba(236,72,153,0.15);"><i class="fa-solid fa-person-breastfeeding" style="color:#ec4899;"></i></div>
+                 </div>
+               </div>
+             </div>
+           </div>
+
+           <div style="margin-bottom:16px;">
+             <div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Équipements & Ressources</div>
+             <div class="kpi-grid">
+               <div class="kpi">
+                 <div class="kpi-top">
+                   <div>
+                     <div class="kpi-label" style="font-size:11px;">Ambulances</div>
+                     <div class="kpi-value" style="font-size:18px;">${ambulances}</div>
+                   </div>
+                   <div class="kpi-ico" style="background:rgba(239,68,68,0.15);"><i class="fa-solid fa-truck-medical" style="color:#ef4444;"></i></div>
+                 </div>
+               </div>
+               <div class="kpi">
+                 <div class="kpi-top">
+                   <div>
+                     <div class="kpi-label" style="font-size:11px;">Lits Maternité</div>
+                     <div class="kpi-value" style="font-size:18px;">${litsAccouchement}</div>
+                   </div>
+                   <div class="kpi-ico" style="background:rgba(139,92,246,0.15);"><i class="fa-solid fa-bed-pulse" style="color:#8b5cf6;"></i></div>
+                 </div>
+               </div>
+             </div>
+           </div>
+
+           ${etabs > 0 ? `<div style="padding:10px; background:rgba(16,185,129,0.1); border-radius:6px; border-left:3px solid #10b981;">
+             <div style="font-size:11px; color:rgba(255,255,255,0.8);"><i class="fa-solid fa-circle-check" style="color:#10b981; margin-right:6px;"></i>Services de santé disponibles dans cette commune</div>
+           </div>` : `<div style="padding:10px; background:rgba(239,68,68,0.1); border-radius:6px; border-left:3px solid #ef4444;">
+             <div style="font-size:11px; color:rgba(255,255,255,0.8);"><i class="fa-solid fa-circle-info" style="color:#ef4444; margin-right:6px;"></i>Données détaillées non disponibles</div>
+           </div>`}
         </div>
       </div>`;
-    if (rightPanel) rightPanel.innerHTML = "";
+    if (rightPanel) rightPanel.innerHTML = `<div class="panel-card text-white"><div class="panel-body"><div class="hint">Données de la Direction Provinciale de la Santé.</div></div></div>`;
     setText("headerSubTitle", "Commune : " + communeName);
     return;
   }
@@ -3022,6 +3136,79 @@ function renderStatsCommune(communeName) {
   setText("headerSubTitle", "Commune : " + communeName);
 }
 
+
+// Generate health markers based on real commune data
+function generateHealthMarkersFromData() {
+  const healthMarkers = [];
+
+  if (!AppState.communesFC || !AppState.importedData) return healthMarkers;
+
+  AppState.communesFC.features.forEach(communeFeature => {
+    const communeName = featureName(communeFeature);
+    const nKey = normalizeName(communeName.replace(/^Commune (de |d')/i, ''));
+    const communeData = AppState.importedData[nKey];
+
+    if (!communeData || !communeData.sante) return;
+
+    const sante = communeData.sante;
+    const etabs = parseNumber(sante["Nombre d'établissements sanitaires"]) || 0;
+    const ambulances = parseNumber(sante["Nombre d'ambulances"]) || 0;
+    const medecins = parseNumber(sante["Nombre de médcin"]) || 0;
+    const infirmiers = parseNumber(sante["Nombre d'infirmier"]) || 0;
+    const sageFemmes = parseNumber(sante["Nombre de sage femme"]) || 0;
+
+    // Generate ESSP markers (health establishments)
+    for (let i = 0; i < etabs; i++) {
+      const pt = randomPointInPoly(communeFeature);
+      if (pt) {
+        const subtypes = ["Dispensaire", "CSR 1", "CSU 1", "CSU 2", "CHP"];
+        const subtype = subtypes[i % subtypes.length];
+
+        healthMarkers.push({
+          id: `essp_${nKey}_${i}`,
+          kind: "essp",
+          subtype: subtype,
+          title: `${subtype} - ${communeName}`,
+          nom: `${subtype} - ${communeName}`,
+          commune: communeName,
+          capacite_accueil: etabs > 1 ? Math.floor(medecins / etabs) : medecins,
+          nb_medecins: etabs > 1 ? Math.floor(medecins / etabs) : medecins,
+          nb_infirmiers: etabs > 1 ? Math.floor(infirmiers / etabs) : infirmiers,
+          nb_sage_femmes: etabs > 1 ? Math.floor(sageFemmes / etabs) : sageFemmes,
+          constat: `Établissement de santé de ${communeName}`,
+          img: "assets/essp.avif",
+          lat: pt.geometry.coordinates[1],
+          lng: pt.geometry.coordinates[0]
+        });
+      }
+    }
+
+    // Generate ambulance markers
+    for (let i = 0; i < ambulances; i++) {
+      const pt = randomPointInPoly(communeFeature);
+      if (pt) {
+        healthMarkers.push({
+          id: `amb_${nKey}_${i}`,
+          kind: "ambulance",
+          subtype: null,
+          title: `Ambulance ${i + 1} - ${communeName}`,
+          nom: `Ambulance ${i + 1} - ${communeName}`,
+          commune: communeName,
+          capacite_accueil: "-",
+          nb_medecins: 0,
+          nb_infirmiers: 1,
+          constat: `Ambulance de ${communeName}`,
+          img: "assets/ambulance.jpg",
+          lat: pt.geometry.coordinates[1],
+          lng: pt.geometry.coordinates[0]
+        });
+      }
+    }
+  });
+
+  return healthMarkers;
+}
+
 function renderCommunes(provinceFeature) {
   clearAdmin(); clearMarkers(); clearLabels();
   AppState.level = "province";
@@ -3030,7 +3217,11 @@ function renderCommunes(provinceFeature) {
   updateUIVisibility();
 
   if (!AppState.projects.length) AppState.projects = generateRandomProjectsForProvince(provinceFeature, 90);
-  if (!AppState.santePoints.length) AppState.santePoints = generateRandomSantePointsForProvince(provinceFeature, 35, 10);
+
+  // Generate health markers from real data instead of random
+  if (!AppState.santePoints || AppState.santePoints.length === 0) {
+    AppState.santePoints = generateHealthMarkersFromData();
+  }
 
   if (AppState.selectedSector) renderSectorPanels(AppState.selectedSector);
   else renderStatsPrefecture();
@@ -3095,7 +3286,27 @@ function wireUI() {
         return;
       }
 
-      AppState.selectedSector = btn.dataset.sector;
+      const clickedSector = btn.dataset.sector;
+
+      // Toggle functionality: if clicking the same sector, deactivate it
+      if (AppState.selectedSector === clickedSector) {
+        AppState.selectedSector = null;
+        resetSectorButtons();
+
+        // Return to default view based on current level
+        if (AppState.level === "commune" && AppState.selectedCommune) {
+          renderStatsCommune(featureName(AppState.selectedCommune));
+        } else if (AppState.level === "province") {
+          renderStatsPrefecture();
+        }
+
+        refreshCommunesDiagnosticStyles();
+        renderProjectsMarkers();
+        return;
+      }
+
+      // Activate the clicked sector
+      AppState.selectedSector = clickedSector;
 
       resetSectorButtons();
       btn.classList.add("active");
@@ -3484,6 +3695,26 @@ function parseData(json) {
         };
       }
     });
+  }
+
+  // 4. Health (Santé)
+  const tSante = json.tables.find(t => t.nom === "SANTE");
+  if (tSante && tSante.sections) {
+    // Province
+    const sProv = tSante.sections.find(s => s.type.toLowerCase().includes("province"));
+    if (sProv && sProv.donnees) {
+      if (!AppState.provinceStats) AppState.provinceStats = {};
+      AppState.provinceStats.sante = sProv.donnees;
+    }
+
+    // Communes
+    const sCom = tSante.sections.find(s => s.type === "Données par commune");
+    if (sCom && sCom.donnees && Array.isArray(sCom.donnees)) {
+      sCom.donnees.forEach(d => {
+        const c = getCommune(d["Collectivités territoriales"]);
+        c.sante = d;
+      });
+    }
   }
 }
 
