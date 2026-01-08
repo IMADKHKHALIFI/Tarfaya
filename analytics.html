@@ -74,6 +74,10 @@
                     <i class="fa-solid fa-briefcase"></i>
                     <span>Emploi</span>
                 </button>
+                <button class="sector-tab" data-sector="water">
+                    <i class="fa-solid fa-droplet"></i>
+                    <span>Eau</span>
+                </button>
                 <button class="sector-tab" data-sector="demographics">
                     <i class="fa-solid fa-users"></i>
                     <span>Démographie</span>
@@ -316,6 +320,70 @@
                         </div>
                         <div class="chart-body">
                             <div id="correlationChart"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Water Section -->
+        <div id="water-section" class="sector-content">
+            <section class="mb-8">
+                <h2 class="text-xl font-bold text-white mb-4">Analyse de l'Eau</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Infrastructure Coverage -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <i class="fa-solid fa-chart-bar text-cyan-400"></i>
+                                Couverture Infrastructure
+                            </h3>
+                            <p class="chart-subtitle">Stations et branchements par commune</p>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="waterInfraChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Production Capacity -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <i class="fa-solid fa-flask text-green-400"></i>
+                                Capacité de Production
+                            </h3>
+                            <p class="chart-subtitle">Production par commune (l/s)</p>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="waterPerformanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Connection Rate Analysis -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <i class="fa-solid fa-chart-line text-blue-400"></i>
+                                Taux de Raccordement
+                            </h3>
+                            <p class="chart-subtitle">Branchements vs raccordements</p>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="waterConnectionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Sanitation Coverage -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <i class="fa-solid fa-chart-pie text-yellow-400"></i>
+                                Couverture Assainissement
+                            </h3>
+                            <p class="chart-subtitle">Taux de couverture par commune</p>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="waterDecisionMatrix"></canvas>
                         </div>
                     </div>
                 </div>

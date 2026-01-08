@@ -315,6 +315,69 @@ const DATA_JSON = {
                     ]
                 }
             ]
+        },
+        {
+            "nom": "EAU",
+            "sections": [
+                {
+                    "type": "Données par province",
+                    "donnees": {
+                        "Collectivités territoriales": "Province de Tarfaya",
+                        "Infrastructure Production EP": 6,
+                        "Capacité de production": "44 l/s",
+                        "Nombre de branchement EP": 4755,
+                        "Nombre de raccordement aux réseaux publics": 3486,
+                        "Taux de couverture en assainissement": "73.31%",
+                        "Taux de rendement infrastructure production EP": "98.5%",
+                        "Taux de rendement infrastructure distribution EP": "73%"
+                    }
+                },
+                {
+                    "type": "Données par commune",
+                    "donnees": [
+                        {
+                            "Collectivités territoriales": "Commune de Tarfaya",
+                            "Infrastructure Production EP": 3,
+                            "Capacité de production": "28 l/s",
+                            "Nombre de branchement EP": 3486,
+                            "Nombre de raccordement aux réseaux publics": 3486,
+                            "Taux de couverture en assainissement": "90%"
+                        },
+                        {
+                            "Collectivités territoriales": "Commune d'Akhfennir",
+                            "Infrastructure Production EP": 1,
+                            "Capacité de production": "6 l/s",
+                            "Nombre de branchement EP": 933,
+                            "Nombre de raccordement aux réseaux publics": 0,
+                            "Taux de couverture en assainissement": "0%"
+                        },
+                        {
+                            "Collectivités territoriales": "Commune de Tah",
+                            "Infrastructure Production EP": 1,
+                            "Capacité de production": "5 l/s",
+                            "Nombre de branchement EP": 147,
+                            "Nombre de raccordement aux réseaux publics": 0,
+                            "Taux de couverture en assainissement": "0%"
+                        },
+                        {
+                            "Collectivités territoriales": "Commune d'El Hagounia",
+                            "Infrastructure Production EP": 0,
+                            "Capacité de production": "0 l/s",
+                            "Nombre de branchement EP": 0,
+                            "Nombre de raccordement aux réseaux publics": 0,
+                            "Taux de couverture en assainissement": "0%"
+                        },
+                        {
+                            "Collectivités territoriales": "Commune de Daoura",
+                            "Infrastructure Production EP": 1,
+                            "Capacité de production": "2,6 l/s",
+                            "Nombre de branchement EP": 189,
+                            "Nombre de raccordement aux réseaux publics": 0,
+                            "Taux de couverture en assainissement": "0%"
+                        }
+                    ]
+                }
+            ]
         }
     ]
 };

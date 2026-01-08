@@ -121,53 +121,83 @@ function fichePopupHTML(d) {
     return `
       <div class="text-white" style="min-width:320px; max-width:420px;">
         <div class="font-semibold text-[16px] mb-3 flex items-center gap-2">
-          <i class="fa-solid fa-clipboard-list text-white/80"></i>
-          Fiche technique
+          <i class="fa-solid fa-hospital text-red-400"></i>
+          ${nom}
         </div>
 
-        <div class="flex gap-3">
-          <div class="w-[150px] shrink-0 rounded-2xl overflow-hidden border border-white/10 bg-white/5">
-            <img src="${img}" alt="${nom}"
-              style="width:150px; height:150px; object-fit:cover; display:block;"
-              onerror="this.src='assets/fiche-default.jpg'"/>
-          </div>
-
-          <div class="flex-1 text-[12px] space-y-2">
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-white/70">Nom</span>
-              <span class="font-semibold text-right">${nom}</span>
-            </div>
-
-            ${commune ? `<div class="flex items-center justify-between gap-3">
-              <span class="text-white/70">Commune</span>
-              <span class="font-semibold text-right">${commune}</span>
-            </div>` : ''}
-
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-white/70">Capacité d'accueil</span>
-              <span class="font-semibold">${capacite}</span>
-            </div>
-
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-white/70">👨‍⚕️ Médecins</span>
-              <span class="font-semibold">${med}</span>
-            </div>
-
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-white/70">👩‍⚕️ Infirmiers</span>
-              <span class="font-semibold">${inf}</span>
-            </div>
-
-            ${sageFemmes > 0 ? `<div class="flex items-center justify-between gap-3">
-              <span class="text-white/70">🤱 Sages-femmes</span>
-              <span class="font-semibold">${sageFemmes}</span>
-            </div>` : ''}
-          </div>
+        <div class="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+          <img src="${img}" alt="${nom}"
+            style="width:100%; height:250px; object-fit:cover; display:block;"
+            onerror="this.src='assets/fiche-default.jpg'"/>
         </div>
 
-        <div class="mt-3 p-3 rounded-xl border border-white/10 bg-white/5">
-          <div class="text-white/70 mb-1">Constat</div>
-          <div class="text-white/90 leading-relaxed">${constat}</div>
+        ${commune ? `<div class="mt-3 text-center text-white/70 text-sm">
+          <i class="fa-solid fa-location-dot mr-1"></i>
+          ${commune}
+        </div>` : ''}
+      </div>
+    `;
+  }
+
+  // Ambulance popup - simplified
+  if (d.kind === "ambulance") {
+    return `
+      <div class="text-white" style="min-width:320px; max-width:420px;">
+        <div class="font-semibold text-[16px] mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-truck-medical text-red-400"></i>
+          ${nom}
+        </div>
+
+        <div class="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+          <img src="${img}" alt="${nom}"
+            style="width:100%; height:250px; object-fit:cover; display:block;"
+            onerror="this.src='assets/ambulance.jpg'"/>
+        </div>
+
+        ${commune ? `<div class="mt-3 text-center text-white/70 text-sm">
+          <i class="fa-solid fa-location-dot mr-1"></i>
+          ${commune}
+        </div>` : ''}
+      </div>
+    `;
+  }
+
+  // Special handling for employment (emploi) markers
+  if (d.sector === "emploi" || d.kind === "emploi") {
+    return `
+      <div class="text-white" style="min-width:280px; max-width:350px;">
+        <div class="font-semibold text-[14px] mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-briefcase text-orange-400"></i>
+          Centre Emploi - ${commune}
+        </div>
+
+        <div class="space-y-2">
+          <div class="p-2 rounded-lg" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05)); border: 1px solid rgba(34, 197, 94, 0.3);">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-white/70 text-xs">💼 Taux d'activité</span>
+              <span class="text-lg font-bold text-green-300">${d.tauxActivite}%</span>
+            </div>
+            <div class="w-full bg-white/10 rounded-full h-1.5">
+              <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-1.5 rounded-full" style="width: ${d.tauxActivite}%"></div>
+            </div>
+          </div>
+
+          <div class="p-2 rounded-lg" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05)); border: 1px solid rgba(239, 68, 68, 0.3);">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-white/70 text-xs">📉 Taux de chômage</span>
+              <span class="text-lg font-bold text-red-300">${d.tauxChomage}%</span>
+            </div>
+            <div class="w-full bg-white/10 rounded-full h-1.5">
+              <div class="bg-gradient-to-r from-red-500 to-rose-500 h-1.5 rounded-full" style="width: ${d.tauxChomage}%"></div>
+            </div>
+          </div>
+
+          <div class="p-2 rounded-lg bg-white/5 border border-white/10">
+            <div class="flex items-center justify-between">
+              <span class="text-white/70 text-xs">👥 Population active</span>
+              <span class="text-base font-bold text-white">${d.popActive ? d.popActive.toLocaleString() : '—'}</span>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -228,7 +258,57 @@ function fichePopupHTML(d) {
       `;
     }
 
-    // Generic popup for emploi and eau
+    // Special handling for water (eau) markers
+    if (d.sector === "eau" || d.kind === "eau") {
+      return `
+        <div class="text-white" style="min-width:320px; max-width:420px;">
+          <div class="font-semibold text-[16px] mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-faucet-drip text-cyan-400"></i>
+            Station de Dessalement
+          </div>
+
+          <div class="rounded-2xl overflow-hidden border border-white/10 bg-white/5 mb-3">
+            <img src="${d.img || img}" alt="${nom}"
+              style="width:100%; height:200px; object-fit:cover; display:block;"
+              onerror="this.src='assets/fiche-default.jpg'"/>
+          </div>
+
+          <div class="space-y-2 text-[12px]">
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-white/70">Commune</span>
+              <span class="font-semibold text-right">${commune}</span>
+            </div>
+
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-white/70">💧 Capacité de production</span>
+              <span class="font-semibold text-cyan-300">${d.capacite || '—'}</span>
+            </div>
+
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-white/70">🔌 Branchements EP</span>
+              <span class="font-semibold">${d.branchements || 0}</span>
+            </div>
+
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-white/70">🏠 Raccordements réseau</span>
+              <span class="font-semibold">${d.raccordements || 0}</span>
+            </div>
+
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-white/70">📊 Taux couverture</span>
+              <span class="font-semibold text-green-300">${d.tauxCouverture || '0%'}</span>
+            </div>
+          </div>
+
+          <div class="mt-3 p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/10">
+            <div class="text-cyan-300 text-xs font-semibold mb-1">Infrastructure</div>
+            <div class="text-white/90 text-xs leading-relaxed">${d.desc || 'Station de dessalement d\'eau'}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Generic popup for emploi and other sectors
     return `
       <div class="text-white" style="min-width:300px; max-width:380px;">
         <div class="font-semibold text-[16px] mb-3 flex items-center gap-2">
@@ -1343,61 +1423,127 @@ function renderSectorPanels(sectorKey) {
   }
 
   if (sectorKey === "eau") {
-    // Tarfaya specific
+    // Tarfaya specific - Water sector
     if (AppState.selectedProvince && isTarfayaProvince(AppState.selectedProvince)) {
-      const d = TARFAYA_DATA.details.eau;
-      const dIn = d.infrastructures;
-      const total = dIn.length;
+      const eauData = AppState.provinceStats?.eau || {};
+      const infrastructure = parseNumber(eauData["Infrastructure Production EP"]) || 0;
+      const capacite = eauData["Capacité de production"] || "0 l/s";
+      const branchements = parseNumber(eauData["Nombre de branchement EP"]) || 0;
+      const raccordements = parseNumber(eauData["Nombre de raccordement aux réseaux publics"]) || 0;
+      const tauxCouverture = eauData["Taux de couverture en assainissement"] || "0%";
+      const tauxRendementProd = eauData["Taux de rendement infrastructure production EP"] || "0%";
+      const tauxRendementDist = eauData["Taux de rendement infrastructure distribution EP"] || "0%";
 
       if (leftPanel) leftPanel.innerHTML = `
-          <div class="panel-card text-white">
-            <div class="panel-header">
-              <div>
-                <div class="panel-title">Indicateurs — Eau</div>
-                <div class="panel-sub">Accès et Ressources</div>
-              </div>
-              <span class="badge-chip"><span class="badge-dot" style="background:#06b6d4;"></span> Eau</span>
-            </div>
-            <div class="panel-body">
-              <div class="kpi-grid">
-                <div class="kpi">
-                  <div class="kpi-top">
-                    <div>
-                      <div class="kpi-label">Stations</div>
-                      <div class="kpi-value">${total}</div>
-                    </div>
-                    <div class="kpi-ico"><i class="fa-solid fa-faucet-drip"></i></div>
-                  </div>
-                </div>
-                <div class="kpi">
-                  <div class="kpi-top">
-                    <div>
-                      <div class="kpi-label">Projets Majeurs</div>
-                      <div class="kpi-value">${dIn.filter(x => x.type.includes("haute")).length}</div>
-                    </div>
-                    <div class="kpi-ico"><i class="fa-solid fa-water"></i></div>
-                  </div>
-                </div>
-              </div>
-              <div class="mt-3 p-3 rounded-xl border border-white/10 bg-white/5">
-                <div class="text-[11px] text-white/70 mb-1">Infrastructure CLé</div>
-                <div class="text-white/90 text-sm">Station de dessalement Tarfaya</div>
-              </div>
-            </div>
+      <div class="panel-card text-white">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">💧 Infrastructure Eau</div>
+            <div class="panel-sub">Production et Distribution</div>
           </div>
-        `;
+          <span class="badge-chip"><span class="badge-dot" style="background:#06b6d4;"></span> Province</span>
+        </div>
+        <div class="panel-body">
+           <div class="kpi-grid">
+              <div class="kpi">
+                <div class="kpi-top">
+                  <div>
+                    <div class="kpi-label">Stations EP</div>
+                    <div class="kpi-value">${infrastructure}</div>
+                  </div>
+                  <div class="kpi-ico"><i class="fa-solid fa-industry"></i></div>
+                </div>
+                <div class="kpi-note">Stations de production</div>
+              </div>
+              
+              <div class="kpi">
+                <div class="kpi-top">
+                  <div>
+                    <div class="kpi-label">Capacité</div>
+                    <div class="kpi-value" style="font-size: 18px;">${capacite}</div>
+                  </div>
+                  <div class="kpi-ico"><i class="fa-solid fa-droplet"></i></div>
+                </div>
+                <div class="kpi-note">Production totale</div>
+              </div>
+
+              <div class="kpi">
+                <div class="kpi-top">
+                  <div>
+                    <div class="kpi-label">Branchements</div>
+                    <div class="kpi-value">${branchements.toLocaleString()}</div>
+                  </div>
+                  <div class="kpi-ico"><i class="fa-solid fa-plug"></i></div>
+                </div>
+                <div class="kpi-note">Total branchements EP</div>
+              </div>
+
+              <div class="kpi">
+                <div class="kpi-top">
+                  <div>
+                    <div class="kpi-label">Raccordements</div>
+                    <div class="kpi-value">${raccordements.toLocaleString()}</div>
+                  </div>
+                  <div class="kpi-ico"><i class="fa-solid fa-house-circle-check"></i></div>
+                </div>
+                <div class="kpi-note">Réseau public</div>
+              </div>
+           </div>
+        </div>
+      </div>`;
+
       if (rightPanel) rightPanel.innerHTML = `
-          <div class="panel-card text-white">
-            <div class="panel-header">
-              <div><div class="panel-title">Réseaux</div></div>
+      <div class="panel-card text-white">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">📊 Performance</div>
+            <div class="panel-sub">Taux de couverture et rendement</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="space-y-4">
+            <div class="p-4 rounded-xl" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.05)); border: 1px solid rgba(6, 182, 212, 0.3);">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-white/70 text-sm">🏘️ Couverture Assainissement</span>
+                <span class="text-2xl font-bold text-cyan-300">${tauxCouverture}</span>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2">
+                <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full" style="width: ${tauxCouverture}"></div>
+              </div>
             </div>
-            <div class="panel-body">
-               <div class="hint">
-                 ${d.reseaux.description}
-               </div>
+
+            <div class="p-4 rounded-xl" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.05)); border: 1px solid rgba(34, 197, 94, 0.3);">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-white/70 text-sm">⚙️ Rendement Production</span>
+                <span class="text-2xl font-bold text-green-300">${tauxRendementProd}</span>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2">
+                <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full" style="width: ${tauxRendementProd}"></div>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(59, 130, 246, 0.3);">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-white/70 text-sm">🚰 Rendement Distribution</span>
+                <span class="text-2xl font-bold text-blue-300">${tauxRendementDist}</span>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2">
+                <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full" style="width: ${tauxRendementDist}"></div>
+              </div>
+            </div>
+
+            <div class="mt-4 p-3 rounded-xl bg-white/5 border border-white/10">
+              <div class="text-xs text-white/60 mb-1">💡 Taux de connexion</div>
+              <div class="text-lg font-bold text-white">
+                ${branchements > 0 ? ((raccordements / branchements) * 100).toFixed(1) : 0}%
+              </div>
+              <div class="text-xs text-white/50 mt-1">
+                ${raccordements.toLocaleString()} / ${branchements.toLocaleString()} branchements raccordés
+              </div>
             </div>
           </div>
-        `;
+        </div>
+      </div>`;
       return;
     }
 
@@ -1875,7 +2021,7 @@ function generateRandomSantePointsForProvince(provinceFeature, esspCount = 35, a
         "Couverture correcte, équipements à améliorer.",
         "Surcharge aux heures de pointe."
       ]),
-      img: "assets/essp.avif",
+      img: "assets/image hopital hagounia.png",
       lat, lng
     });
   }
@@ -1921,7 +2067,7 @@ function generateRandomSantePointsForProvince(provinceFeature, esspCount = 35, a
       nb_medecins: 13,
       nb_infirmiers: 60,
       constat: "Hôpital récent de niveau provincial, 70 lits.",
-      img: "assets/essp.avif",
+      img: "assets/image hopital hagounia.png",
       lat: 27.937,
       lng: -12.927
     },
@@ -1935,7 +2081,7 @@ function generateRandomSantePointsForProvince(provinceFeature, esspCount = 35, a
       nb_medecins: 0,
       nb_infirmiers: 4,
       constat: "Centre rural réhabilité, dessert environ 900 habitants.",
-      img: "assets/essp.avif",
+      img: "assets/image hopital hagounia.png",
       lat: 28.166,
       lng: -12.75
     },
@@ -1973,7 +2119,7 @@ function generateRandomSantePointsForProvince(provinceFeature, esspCount = 35, a
         nb_medecins: h.personnel.medecins,
         nb_infirmiers: h.personnel.infirmiers,
         constat: "Hôpital provincial.",
-        img: "assets/essp.avif",
+        img: "assets/image hopital hagounia.png",
         lat: h.lat, lng: h.lng
       });
     });
@@ -1990,7 +2136,7 @@ function generateRandomSantePointsForProvince(provinceFeature, esspCount = 35, a
         nb_medecins: c.personnel.medecins,
         nb_infirmiers: c.personnel.infirmiers,
         constat: "Centre de santé rural.",
-        img: "assets/essp.avif",
+        img: "assets/image hopital hagounia.png",
         lat: c.lat, lng: c.lng
       });
     });
@@ -2019,7 +2165,7 @@ function generateRandomSantePointsForProvince(provinceFeature, esspCount = 35, a
         nb_medecins: 1,
         nb_infirmiers: 2,
         constat: "Structure de proximité.",
-        img: "assets/essp.avif",
+        img: "assets/image hopital hagounia.png",
         lat, lng
       });
     }
@@ -2306,57 +2452,288 @@ function renderSanteMarkers() {
 function generateEducationMarkers(provinceFeature, communeFeature = null) {
   const markers = [];
 
-  // Determine which data to use (commune or province)
-  let eduData;
-  if (communeFeature) {
-    const communeName = featureName(communeFeature);
-    let cleanName = communeName;
-    if (cleanName.toLowerCase().startsWith("commune de ")) {
-      cleanName = cleanName.substring(11);
-    } else if (cleanName.toLowerCase().startsWith("commune d'")) {
-      cleanName = cleanName.substring(10);
-    }
-    const nKey = normalizeName(cleanName);
-    eduData = AppState.importedData?.[nKey]?.edu;
-  } else {
-    eduData = AppState.provinceStats?.edu;
+  console.log(`[generateEducationMarkers] Province: ${provinceFeature ? 'Yes' : 'No'}, Commune: ${communeFeature ? 'Yes' : 'No (All communes)'}`);
+
+  // If at province level (no commune selected), generate markers for ALL communes
+  if (!communeFeature && AppState.communesFC) {
+    console.log(`[generateEducationMarkers] Generating markers for all communes in province`);
+
+    AppState.communesFC.features.forEach(commune => {
+      const communeMarkers = generateEducationMarkersForCommune(commune);
+      markers.push(...communeMarkers);
+    });
+
+    console.log(`[generateEducationMarkers] Generated ${markers.length} total education markers for all communes`);
+    return markers;
   }
 
-  if (!eduData) return markers;
+  // If commune is selected, generate markers only for that commune
+  if (communeFeature) {
+    const communeMarkers = generateEducationMarkersForCommune(communeFeature);
+    console.log(`[generateEducationMarkers] Generated ${communeMarkers.length} education markers for selected commune`);
+    return communeMarkers;
+  }
+
+  return markers;
+}
+
+// Helper function to generate education markers for a single commune
+function generateEducationMarkersForCommune(communeFeature) {
+  const markers = [];
+  const communeName = featureName(communeFeature);
+
+  let cleanName = communeName;
+  if (cleanName.toLowerCase().startsWith("commune de ")) {
+    cleanName = cleanName.substring(11);
+  } else if (cleanName.toLowerCase().startsWith("commune d'")) {
+    cleanName = cleanName.substring(10);
+  }
+
+  const nKey = normalizeName(cleanName);
+  const eduData = AppState.importedData?.[nKey]?.edu;
+
+  console.log(`[generateEducationMarkersForCommune] Commune: ${communeName}, nKey: ${nKey}`);
+  console.log(`[generateEducationMarkersForCommune] eduData:`, eduData);
+
+  if (!eduData) {
+    console.warn(`[generateEducationMarkersForCommune] No education data found for ${communeName}`);
+    return markers;
+  }
 
   // Generate markers for each education level
+  // The data structure is: edu.prescolaire.etabs, edu.primaire.etabs, etc.
   const levels = [
-    { key: "prescolaire", type: "prescolaire", etabsKey: "etabs" },
-    { key: "primaire", type: "primaire", etabsKey: "etabs" },
-    { key: "college", type: "college", etabsKey: "etabs" },
-    { key: "lycee", type: "lycee", etabsKey: "etabs" }
+    { key: "prescolaire", type: "prescolaire" },
+    { key: "primaire", type: "primaire" },
+    { key: "college", type: "college" },
+    { key: "lycee", type: "lycee" }
   ];
 
-  const targetFeature = communeFeature || provinceFeature;
-
   levels.forEach(level => {
-    const count = eduData[level.key]?.[level.etabsKey] || 0;
+    const count = eduData[level.key]?.etabs || 0;
+    console.log(`[generateEducationMarkersForCommune] ${level.type}: ${count} schools`);
+
     for (let i = 0; i < count; i++) {
-      const pt = randomPointInPoly(targetFeature);
+      const pt = randomPointInPoly(communeFeature);
       if (pt) {
         const conf = EDUCATION_CONFIG[level.type];
-        markers.push({
-          id: `edu_${level.type}_${randInt(1, 99999)}`,
+        const marker = {
+          id: `edu_${level.type}_${nKey}_${i}`,
           sector: "education",
           type: level.type,
-          title: conf.label,
+          title: `${conf.label} - ${communeName}`,
+          commune: communeName,
           icon: conf.icon,
           hex: conf.hex,
           lat: pt.geometry.coordinates[1],
           lng: pt.geometry.coordinates[0],
-          desc: `Établissement ${conf.label}`,
+          desc: `Établissement ${conf.label} à ${communeName}`,
+          kind: "education",
           filles: eduData[level.key]?.filles || 0,
           garcons: eduData[level.key]?.garcons || 0
-        });
+        };
+        markers.push(marker);
+        console.log(`[generateEducationMarkersForCommune] Created marker:`, marker);
+      } else {
+        console.warn(`[generateEducationMarkersForCommune] Failed to generate point for ${level.type} #${i}`);
       }
     }
   });
 
+  console.log(`[generateEducationMarkersForCommune] Total markers created for ${communeName}: ${markers.length}`);
+  return markers;
+}
+
+// Generate water infrastructure markers based on data.js
+function generateWaterMarkers(provinceFeature, communeFeature = null) {
+  const markers = [];
+
+  console.log(`[generateWaterMarkers] Province: ${provinceFeature ? 'Yes' : 'No'}, Commune: ${communeFeature ? 'Yes' : 'No (All communes)'}`);
+
+  // If at province level (no commune selected), generate markers for ALL communes
+  if (!communeFeature && AppState.communesFC) {
+    console.log(`[generateWaterMarkers] Generating markers for all communes in province`);
+
+    AppState.communesFC.features.forEach(commune => {
+      const communeMarkers = generateWaterMarkersForCommune(commune);
+      markers.push(...communeMarkers);
+    });
+
+    console.log(`[generateWaterMarkers] Generated ${markers.length} total water markers for all communes`);
+    return markers;
+  }
+
+  // If commune is selected, generate markers only for that commune
+  if (communeFeature) {
+    const communeMarkers = generateWaterMarkersForCommune(communeFeature);
+    console.log(`[generateWaterMarkers] Generated ${communeMarkers.length} water markers for selected commune`);
+    return communeMarkers;
+  }
+
+  return markers;
+}
+
+// Helper function to generate water markers for a single commune
+function generateWaterMarkersForCommune(communeFeature) {
+  const markers = [];
+  const communeName = featureName(communeFeature);
+
+  let cleanName = communeName;
+  if (cleanName.toLowerCase().startsWith("commune de ")) {
+    cleanName = cleanName.substring(11);
+  } else if (cleanName.toLowerCase().startsWith("commune d'")) {
+    cleanName = cleanName.substring(10);
+  }
+
+  const nKey = normalizeName(cleanName);
+  const eauData = AppState.importedData?.[nKey]?.eau;
+
+  console.log(`[generateWaterMarkersForCommune] Commune: ${communeName}, nKey: ${nKey}`);
+  console.log(`[generateWaterMarkersForCommune] eauData:`, eauData);
+
+  if (!eauData) {
+    console.warn(`[generateWaterMarkersForCommune] No water data found for ${communeName}`);
+    return markers;
+  }
+
+  const infrastructureCount = parseNumber(eauData["Infrastructure Production EP"]) || 0;
+  const capacite = eauData["Capacité de production"] || "0 l/s";
+  const branchements = parseNumber(eauData["Nombre de branchement EP"]) || 0;
+  const raccordements = parseNumber(eauData["Nombre de raccordement aux réseaux publics"]) || 0;
+  const tauxCouverture = eauData["Taux de couverture en assainissement"] || "0%";
+
+  console.log(`[generateWaterMarkersForCommune] ${infrastructureCount} water stations`);
+
+  // Map commune names to their image files
+  const imageMap = {
+    'tarfaya': [
+      'assets/Station  de dessalement d\'eau/Station  de dessalement d\'eau tarafaya 1.png',
+      'assets/Station  de dessalement d\'eau/Station  de dessalement d\'eau tarafaya 2.png',
+      'assets/Station  de dessalement d\'eau/Station  de dessalement d\'eau tarafaya 3.png'
+    ],
+    'akhfennir': ['assets/Station  de dessalement d\'eau/Station  de dessalement d\'eau AKHFENIR.png'],
+    'tah': ['assets/Station  de dessalement d\'eau/Station  de dessalement d\'eau tah.png'],
+    'daoura': ['assets/Station  de dessalement d\'eau/Station  de dessalement d\'eau daoura.png'],
+    'elhagounia': [] // No infrastructure
+  };
+
+  const images = imageMap[nKey] || [];
+
+  // Generate markers for water infrastructure
+  for (let i = 0; i < infrastructureCount; i++) {
+    const pt = randomPointInPoly(communeFeature);
+    if (pt) {
+      const marker = {
+        id: `eau_${nKey}_${i}`,
+        sector: "eau",
+        type: "dessalement",
+        title: `Station de Dessalement - ${communeName}`,
+        commune: communeName,
+        icon: "fa-faucet-drip",
+        hex: "#06b6d4",
+        lat: pt.geometry.coordinates[1],
+        lng: pt.geometry.coordinates[0],
+        desc: `Station de dessalement d'eau à ${communeName}`,
+        kind: "eau",
+        img: images[i] || images[0] || "assets/fiche-default.jpg",
+        capacite: capacite,
+        branchements: branchements,
+        raccordements: raccordements,
+        tauxCouverture: tauxCouverture
+      };
+      markers.push(marker);
+      console.log(`[generateWaterMarkersForCommune] Created water marker:`, marker);
+    } else {
+      console.warn(`[generateWaterMarkersForCommune] Failed to generate point for station #${i}`);
+    }
+  }
+
+  console.log(`[generateWaterMarkersForCommune] Total markers created for ${communeName}: ${markers.length}`);
+  return markers;
+}
+
+// Generate employment markers based on data.js
+function generateEmploymentMarkers(provinceFeature, communeFeature = null) {
+  const markers = [];
+
+  console.log(`[generateEmploymentMarkers] Province: ${provinceFeature ? 'Yes' : 'No'}, Commune: ${communeFeature ? 'Yes' : 'No (All communes)'}`);
+
+  // If at province level (no commune selected), generate markers for ALL communes
+  if (!communeFeature && AppState.communesFC) {
+    console.log(`[generateEmploymentMarkers] Generating markers for all communes in province`);
+
+    AppState.communesFC.features.forEach(commune => {
+      const communeMarkers = generateEmploymentMarkersForCommune(commune);
+      markers.push(...communeMarkers);
+    });
+
+    console.log(`[generateEmploymentMarkers] Generated ${markers.length} total employment markers for all communes`);
+    return markers;
+  }
+
+  // If commune is selected, generate markers only for that commune
+  if (communeFeature) {
+    const communeMarkers = generateEmploymentMarkersForCommune(communeFeature);
+    console.log(`[generateEmploymentMarkers] Generated ${communeMarkers.length} employment markers for selected commune`);
+    return communeMarkers;
+  }
+
+  return markers;
+}
+
+// Helper function to generate employment markers for a single commune
+function generateEmploymentMarkersForCommune(communeFeature) {
+  const markers = [];
+  const communeName = featureName(communeFeature);
+
+  let cleanName = communeName;
+  if (cleanName.toLowerCase().startsWith("commune de ")) {
+    cleanName = cleanName.substring(11);
+  } else if (cleanName.toLowerCase().startsWith("commune d'")) {
+    cleanName = cleanName.substring(10);
+  }
+
+  const nKey = normalizeName(cleanName);
+  const empData = AppState.importedData?.[nKey]?.emp;
+
+  console.log(`[generateEmploymentMarkersForCommune] Commune: ${communeName}, nKey: ${nKey}`);
+  console.log(`[generateEmploymentMarkersForCommune] empData:`, empData);
+
+  if (!empData) {
+    console.warn(`[generateEmploymentMarkersForCommune] No employment data found for ${communeName}`);
+    return markers;
+  }
+
+  const tauxActivite = empData.taux_activite || 0;
+  const tauxChomage = empData.taux_chomage || 0;
+  const popActive = empData.pop_active || 0;
+
+  // Generate one employment center marker per commune
+  const pt = randomPointInPoly(communeFeature);
+  if (pt) {
+    const marker = {
+      id: `emploi_${nKey}`,
+      sector: "emploi",
+      type: "centre_emploi",
+      title: `Centre Emploi - ${communeName}`,
+      commune: communeName,
+      icon: "fa-briefcase",
+      hex: "#f97316",
+      lat: pt.geometry.coordinates[1],
+      lng: pt.geometry.coordinates[0],
+      desc: `Centre d'emploi et de formation à ${communeName}`,
+      kind: "emploi",
+      tauxActivite: tauxActivite,
+      tauxChomage: tauxChomage,
+      popActive: popActive
+    };
+    markers.push(marker);
+    console.log(`[generateEmploymentMarkersForCommune] Created employment marker:`, marker);
+  } else {
+    console.warn(`[generateEmploymentMarkersForCommune] Failed to generate point for employment center`);
+  }
+
+  console.log(`[generateEmploymentMarkersForCommune] Total markers created for ${communeName}: ${markers.length}`);
   return markers;
 }
 
@@ -2364,6 +2741,12 @@ function generateEducationMarkers(provinceFeature, communeFeature = null) {
 function generateSectorPoints(sector, provinceFeature) {
   if (sector === "education") {
     return generateEducationMarkers(provinceFeature, AppState.selectedCommune);
+  }
+  if (sector === "eau") {
+    return generateWaterMarkers(provinceFeature, AppState.selectedCommune);
+  }
+  if (sector === "emploi") {
+    return generateEmploymentMarkers(provinceFeature, AppState.selectedCommune);
   }
   // Return empty array for other sectors (they use different generation methods)
   return [];
@@ -2377,18 +2760,25 @@ function renderProjectsMarkers() {
 
   let filtered = [];
 
+  console.log(`[renderProjectsMarkers] Sector: ${AppState.selectedSector}, Province: ${AppState.selectedProvince ? 'Yes' : 'No'}`);
+
   // Use generated points for Tarfaya special sectors
   if (isTarfayaProvince(AppState.selectedProvince) && ["eau", "education", "emploi"].includes(AppState.selectedSector)) {
     filtered = generateSectorPoints(AppState.selectedSector, AppState.selectedProvince);
+    console.log(`[renderProjectsMarkers] Generated ${filtered.length} markers for ${AppState.selectedSector}`);
   } else {
     filtered = AppState.projects.filter(p => p.sector === AppState.selectedSector);
   }
 
   if (AppState.selectedCommune) {
+    const beforeFilter = filtered.length;
     filtered = filtered.filter(p => {
       try { return turf.booleanPointInPolygon(turf.point([p.lng, p.lat]), AppState.selectedCommune); }
       catch (e) { return false; }
     });
+    console.log(`[renderProjectsMarkers] Filtered from ${beforeFilter} to ${filtered.length} markers for commune`);
+  } else {
+    console.log(`[renderProjectsMarkers] No commune selected, showing all ${filtered.length} markers`);
   }
 
   const sectorConf = SECTOR_CONFIG[AppState.selectedSector];
@@ -2414,6 +2804,8 @@ function renderProjectsMarkers() {
     const m = L.marker([p.lat, p.lng], { icon: customIcon }).addTo(markersLayer);
     m.bindPopup(fichePopupHTML(p), { maxWidth: 380 });
   });
+
+  console.log(`[renderProjectsMarkers] Rendered ${filtered.length} markers on map`);
 }
 
 function renderRegions() {
@@ -2769,19 +3161,129 @@ function renderStatsPrefecture() {
         </div>
       </div>`;
     } else if (AppState.selectedSector === "eau") {
-      // Same for Eau
-      const dEau = { stations: 2, reseaux: "Oui" };
+      // Water sector - comprehensive statistics
+      const eauData = provinceStats.eau || {};
+      console.log('[renderStatsPrefecture] provinceStats:', provinceStats);
+      console.log('[renderStatsPrefecture] eauData:', eauData);
+
+      const infrastructure = parseNumber(eauData["Infrastructure Production EP"]) || 0;
+      const capacite = eauData["Capacité de production"] || "0 l/s";
+      const branchements = parseNumber(eauData["Nombre de branchement EP"]) || 0;
+      const raccordements = parseNumber(eauData["Nombre de raccordement aux réseaux publics"]) || 0;
+      const tauxCouverture = eauData["Taux de couverture en assainissement"] || "0%";
+      const tauxRendementProd = eauData["Taux de rendement infrastructure production EP"] || "0%";
+      const tauxRendementDist = eauData["Taux de rendement infrastructure distribution EP"] || "0%";
+
+      console.log('[renderStatsPrefecture] Parsed values:', { infrastructure, capacite, branchements, raccordements });
+
       leftPanel.innerHTML = `
       <div class="panel-card text-white">
         <div class="panel-header">
-          <div><div class="panel-title">Eau - Province</div></div>
-          <span class="badge-chip"><span class="badge-dot" style="background:#06b6d4;"></span> Eau</span>
+          <div>
+            <div class="panel-title">💧 Infrastructure Eau</div>
+            <div class="panel-sub">Production et Distribution</div>
+          </div>
+          <span class="badge-chip"><span class="badge-dot" style="background:#06b6d4;"></span> Province</span>
         </div>
         <div class="panel-body">
            <div class="kpi-grid">
-              <div class="kpi"><div class="kpi-top"><div><div class="kpi-label">Stations</div><div class="kpi-value">${dEau.stations}</div></div><div class="kpi-ico"><i class="fa-solid fa-water"></i></div></div></div>
-              <div class="kpi"><div class="kpi-top"><div><div class="kpi-label">Réseau</div><div class="kpi-value">${dEau.reseaux}</div></div><div class="kpi-ico"><i class="fa-solid fa-faucet"></i></div></div></div>
+              <div class="kpi">
+                <div class="kpi-top">
+                  <div>
+                    <div class="kpi-label">Stations EP</div>
+                    <div class="kpi-value">${infrastructure}</div>
+                  </div>
+                  <div class="kpi-ico"><i class="fa-solid fa-industry"></i></div>
+                </div>
+                <div class="kpi-note">Stations de production</div>
+              </div>
+              
+              <div class="kpi">
+                <div class="kpi-top">
+                  <div>
+                    <div class="kpi-label">Capacité</div>
+                    <div class="kpi-value" style="font-size: 18px;">${capacite}</div>
+                  </div>
+                  <div class="kpi-ico"><i class="fa-solid fa-droplet"></i></div>
+                </div>
+                <div class="kpi-note">Production totale</div>
+              </div>
+
+              <div class="kpi">
+                <div class="kpi-top">
+                  <div>
+                    <div class="kpi-label">Branchements</div>
+                    <div class="kpi-value">${branchements.toLocaleString()}</div>
+                  </div>
+                  <div class="kpi-ico"><i class="fa-solid fa-plug"></i></div>
+                </div>
+                <div class="kpi-note">Total branchements EP</div>
+              </div>
+
+              <div class="kpi">
+                <div class="kpi-top">
+                  <div>
+                    <div class="kpi-label">Raccordements</div>
+                    <div class="kpi-value">${raccordements.toLocaleString()}</div>
+                  </div>
+                  <div class="kpi-ico"><i class="fa-solid fa-house-circle-check"></i></div>
+                </div>
+                <div class="kpi-note">Réseau public</div>
+              </div>
            </div>
+        </div>
+      </div>`;
+
+      rightPanel.innerHTML = `
+      <div class="panel-card text-white">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">📊 Performance</div>
+            <div class="panel-sub">Taux de couverture et rendement</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="space-y-4">
+            <div class="p-4 rounded-xl" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.05)); border: 1px solid rgba(6, 182, 212, 0.3);">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-white/70 text-sm">🏘️ Couverture Assainissement</span>
+                <span class="text-2xl font-bold text-cyan-300">${tauxCouverture}</span>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2">
+                <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full" style="width: ${tauxCouverture}"></div>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.05)); border: 1px solid rgba(34, 197, 94, 0.3);">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-white/70 text-sm">⚙️ Rendement Production</span>
+                <span class="text-2xl font-bold text-green-300">${tauxRendementProd}</span>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2">
+                <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full" style="width: ${tauxRendementProd}"></div>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(59, 130, 246, 0.3);">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-white/70 text-sm">🚰 Rendement Distribution</span>
+                <span class="text-2xl font-bold text-blue-300">${tauxRendementDist}</span>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2">
+                <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full" style="width: ${tauxRendementDist}"></div>
+              </div>
+            </div>
+
+            <div class="mt-4 p-3 rounded-xl bg-white/5 border border-white/10">
+              <div class="text-xs text-white/60 mb-1">💡 Taux de connexion</div>
+              <div class="text-lg font-bold text-white">
+                ${branchements > 0 ? ((raccordements / branchements) * 100).toFixed(1) : 0}%
+              </div>
+              <div class="text-xs text-white/50 mt-1">
+                ${raccordements.toLocaleString()} / ${branchements.toLocaleString()} branchements raccordés
+              </div>
+            </div>
+          </div>
         </div>
       </div>`;
     } else {
@@ -3044,14 +3546,78 @@ function renderStatsCommune(communeName) {
   }
 
   if (AppState.selectedSector === "eau") {
+    const eauData = data?.eau || {};
+    const infrastructure = parseNumber(eauData["Infrastructure Production EP"]) || 0;
+    const capacite = eauData["Capacité de production"] || "0 l/s";
+    const branchements = parseNumber(eauData["Nombre de branchement EP"]) || 0;
+    const raccordements = parseNumber(eauData["Nombre de raccordement aux réseaux publics"]) || 0;
+    const tauxCouverture = eauData["Taux de couverture en assainissement"] || "0%";
+
     if (leftPanel) leftPanel.innerHTML = `
       <div class="panel-card text-white">
         <div class="panel-header">
-          <div><div class="panel-title">Eau - ${communeName}</div></div>
+          <div>
+            <div class="panel-title">💧 Eau - ${communeName}</div>
+            <div class="panel-sub">Infrastructure locale</div>
+          </div>
           <span class="badge-chip"><span class="badge-dot" style="background:#06b6d4;"></span> Eau</span>
         </div>
         <div class="panel-body">
-           <div class="hint">Données détaillées non disponibles pour cette commune.</div>
+          <div class="kpi-grid">
+            <div class="kpi">
+              <div class="kpi-top">
+                <div>
+                  <div class="kpi-label">Stations</div>
+                  <div class="kpi-value">${infrastructure}</div>
+                </div>
+                <div class="kpi-ico"><i class="fa-solid fa-industry"></i></div>
+              </div>
+              <div class="kpi-note">Production EP</div>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-top">
+                <div>
+                  <div class="kpi-label">Capacité</div>
+                  <div class="kpi-value" style="font-size: 16px;">${capacite}</div>
+                </div>
+                <div class="kpi-ico"><i class="fa-solid fa-droplet"></i></div>
+              </div>
+              <div class="kpi-note">Production</div>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-top">
+                <div>
+                  <div class="kpi-label">Branchements</div>
+                  <div class="kpi-value">${branchements.toLocaleString()}</div>
+                </div>
+                <div class="kpi-ico"><i class="fa-solid fa-plug"></i></div>
+              </div>
+              <div class="kpi-note">Total EP</div>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-top">
+                <div>
+                  <div class="kpi-label">Couverture</div>
+                  <div class="kpi-value" style="font-size: 20px;">${tauxCouverture}</div>
+                </div>
+                <div class="kpi-ico"><i class="fa-solid fa-chart-pie"></i></div>
+              </div>
+              <div class="kpi-note">Assainissement</div>
+            </div>
+          </div>
+
+          <div class="mt-4 p-4 rounded-xl" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.05)); border: 1px solid rgba(6, 182, 212, 0.3);">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-white/70 text-sm">🏘️ Raccordements réseau public</span>
+              <span class="text-xl font-bold text-cyan-300">${raccordements.toLocaleString()}</span>
+            </div>
+            <div class="text-xs text-white/50 mt-2">
+              ${branchements > 0 ? `Taux: ${((raccordements / branchements) * 100).toFixed(1)}%` : 'Aucun branchement'}
+            </div>
+          </div>
         </div>
       </div>`;
     if (rightPanel) rightPanel.innerHTML = "";
@@ -3152,6 +3718,22 @@ function generateHealthMarkersFromData() {
 
   if (!AppState.communesFC || !AppState.importedData) return healthMarkers;
 
+  // Map commune names to their hospital image files
+  const imageMap = {
+    'tarfaya': [
+      'assets/image des hopitaux santé/hapital tarfaya 1.png',
+      'assets/image des hopitaux santé/hopital tarfaya 2.png',
+      'assets/image des hopitaux santé/hopital tarfaya 3.png'
+    ],
+    'akhfennir': ['assets/image des hopitaux santé/hopital AKHFENNIR.png'],
+    'tah': [
+      'assets/image des hopitaux santé/hopital tah 1.png',
+      'assets/image des hopitaux santé/hopital tah 2.png'
+    ],
+    'daoura': ['assets/image des hopitaux santé/hopital DAOURA.png'],
+    'el hagounia': ['assets/image des hopitaux santé/image hopital hagounia.png']
+  };
+
   AppState.communesFC.features.forEach(communeFeature => {
     const communeName = featureName(communeFeature);
     const nKey = normalizeName(communeName.replace(/^Commune (de |d')/i, ''));
@@ -3165,6 +3747,8 @@ function generateHealthMarkersFromData() {
     const medecins = parseNumber(sante["Nombre de médcin"]) || 0;
     const infirmiers = parseNumber(sante["Nombre d'infirmier"]) || 0;
     const sageFemmes = parseNumber(sante["Nombre de sage femme"]) || 0;
+
+    const images = imageMap[nKey] || [];
 
     // Generate ESSP markers (health establishments)
     for (let i = 0; i < etabs; i++) {
@@ -3185,7 +3769,7 @@ function generateHealthMarkersFromData() {
           nb_infirmiers: etabs > 1 ? Math.floor(infirmiers / etabs) : infirmiers,
           nb_sage_femmes: etabs > 1 ? Math.floor(sageFemmes / etabs) : sageFemmes,
           constat: `Établissement de santé de ${communeName}`,
-          img: "assets/essp.avif",
+          img: images[i] || images[0] || "assets/image hopital hagounia.png",
           lat: pt.geometry.coordinates[1],
           lng: pt.geometry.coordinates[0]
         });
@@ -3459,13 +4043,17 @@ function generateMarkersFromExcel(communeFeature, data) {
 function randomPointInPoly(feature) {
   const bbox = turf.bbox(feature);
   let guard = 0;
-  while (guard < 50) {
+  const maxAttempts = 1000; // Increased to handle very complex coastal shapes
+
+  while (guard < maxAttempts) {
     guard++;
     const lng = rand(bbox[0], bbox[2]);
     const lat = rand(bbox[1], bbox[3]);
     const pt = turf.point([lng, lat]);
     if (turf.booleanPointInPolygon(pt, feature)) return pt;
   }
+
+  console.warn(`[randomPointInPoly] Failed to find point inside polygon after ${maxAttempts} attempts`);
   return null; // fallback
 }
 
@@ -3723,6 +4311,32 @@ function parseData(json) {
         const c = getCommune(d["Collectivités territoriales"]);
         c.sante = d;
       });
+    }
+  }
+
+  // 5. Water (EAU)
+  const tEau = json.tables.find(t => t.nom === "EAU");
+  console.log('[parseData] Found EAU table:', tEau);
+
+  if (tEau && tEau.sections) {
+    // Province
+    const sProv = tEau.sections.find(s => s.type.toLowerCase().includes("province"));
+    console.log('[parseData] Found province water section:', sProv);
+
+    if (sProv && sProv.donnees) {
+      if (!AppState.provinceStats) AppState.provinceStats = {};
+      AppState.provinceStats.eau = sProv.donnees;
+      console.log('[parseData] Set provinceStats.eau:', AppState.provinceStats.eau);
+    }
+
+    // Communes
+    const sCom = tEau.sections.find(s => s.type === "Données par commune");
+    if (sCom && sCom.donnees && Array.isArray(sCom.donnees)) {
+      sCom.donnees.forEach(d => {
+        const c = getCommune(d["Collectivités territoriales"]);
+        c.eau = d;
+      });
+      console.log('[parseData] Parsed water data for', sCom.donnees.length, 'communes');
     }
   }
 }

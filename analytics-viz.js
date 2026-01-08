@@ -97,6 +97,23 @@ function processData() {
         }
     }
 
+    // Process Water (EAU)
+    const eauTable = DATA_JSON.tables.find(t => t.nom === "EAU");
+    if (eauTable) {
+        const provinceSec = eauTable.sections.find(s => s.type.toLowerCase().includes("province"));
+        if (provinceSec) {
+            processedData.province.eau = provinceSec.donnees;
+        }
+
+        const communeSec = eauTable.sections.find(s => s.type === "Données par commune");
+        if (communeSec && communeSec.donnees) {
+            communeSec.donnees.forEach(d => {
+                const c = getCommune(d["Collectivités territoriales"]);
+                c.eau = d;
+            });
+        }
+    }
+
     processedData.communes = Object.values(communes);
     console.log('Processed Data:', processedData);
 }
@@ -665,6 +682,39 @@ function createSchoolDistChart() {
         .call(d3.axisLeft(y))
         .selectAll('text')
         .style('fill', '#fff');
+
+    // Add Legend
+    const legend = svg.append('g')
+        .attr('class', 'legend')
+        .attr('transform', `translate(${width + 20}, 0)`);
+
+    const legendData = [
+        { key: 'prescolaire', label: 'Préscolaire', color: '#a78bfa' },
+        { key: 'primaire', label: 'Primaire', color: '#60a5fa' },
+        { key: 'college', label: 'Collège', color: '#34d399' },
+        { key: 'lycee', label: 'Lycée', color: '#fbbf24' }
+    ];
+
+    const legendItems = legend.selectAll('.legend-item')
+        .data(legendData)
+        .enter()
+        .append('g')
+        .attr('class', 'legend-item')
+        .attr('transform', (d, i) => `translate(0, ${i * 25})`);
+
+    legendItems.append('rect')
+        .attr('width', 18)
+        .attr('height', 18)
+        .attr('fill', d => d.color)
+        .attr('rx', 3);
+
+    legendItems.append('text')
+        .attr('x', 24)
+        .attr('y', 9)
+        .attr('dy', '.35em')
+        .style('fill', '#fff')
+        .style('font-size', '12px')
+        .text(d => d.label);
 }
 
 // Enrollment Area Chart
@@ -1857,15 +1907,20 @@ function setupTabs() {
     const tabs = document.querySelectorAll('.sector-tab');
     const contents = document.querySelectorAll('.sector-content');
 
+    console.log('[setupTabs] Found', tabs.length, 'tabs and', contents.length, 'content sections');
+
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const sector = tab.dataset.sector;
+            console.log('[setupTabs] Tab clicked:', sector);
 
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
 
             contents.forEach(c => c.classList.remove('active'));
             const targetContent = document.getElementById(`${sector}-section`);
+            console.log('[setupTabs] Target section:', `${sector}-section`, 'Found:', !!targetContent);
+
             if (targetContent) {
                 targetContent.classList.add('active');
             }
@@ -1917,6 +1972,12 @@ document.addEventListener('DOMContentLoaded', () => {
     createDensityChart();
     createHouseholdChart();
 
+    // Water Analytics
+    createWaterInfraChart();
+    createWaterPerformanceChart();
+    createWaterConnectionChart();
+    createWaterSanitationChart();
+
     // Three.js 3D Visualization
     // init3DVisualization();
 
@@ -1926,3 +1987,316 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log('Analytics Dashboard Loaded!');
 });
+// ==================== WATER ANALYTICS ====================
+
+function createWaterInfraChart() {
+    const ctx = document.getElementById('waterInfraChart');
+    if (!ctx) return;
+
+    const communes = processedData.communes.map(c => c.name);
+    const stations = processedData.communes.map(c => c.eau?.["Infrastructure Production EP"] || 0);
+    const branchements = processedData.communes.map(c => c.eau?.["Nombre de branchement EP"] || 0);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: communes,
+            datasets: [
+                {
+                    label: 'Stations EP',
+                    data: stations,
+                    backgroundColor: 'rgba(6, 182, 212, 0.7)',
+                    borderColor: 'rgba(6, 182, 212, 1)',
+                    borderWidth: 2
+                },
+                {
+                    label: 'Branchements (÷100)',
+                    data: branchements.map(b => Math.round(b / 100)),
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#fff' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            if (context.datasetIndex === 1) {
+                                // Show actual branchements value
+                                label += (context.parsed.y * 100).toLocaleString();
+                            } else {
+                                label += context.parsed.y;
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                y: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+            }
+        }
+    });
+}
+
+function createWaterPerformanceChart() {
+    const ctx = document.getElementById('waterPerformanceChart');
+    if (!ctx) return;
+
+    const communes = processedData.communes.map(c => c.name);
+    const capacities = processedData.communes.map(c => {
+        const cap = c.eau?.["Capacité de production"] || "0 l/s";
+        return parseFloat(cap.toString().replace(/[^\d.]/g, '')) || 0;
+    });
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: communes,
+            datasets: [
+                {
+                    label: 'Capacité (l/s)',
+                    data: capacities,
+                    backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                    borderColor: 'rgba(34, 197, 94, 1)',
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#fff' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return `Capacité: ${context.parsed.y} l/s`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                y: {
+                    ticks: { color: '#fff' },
+                    grid: { color: 'rgba(255,255,255,0.1)' },
+                    title: {
+                        display: true,
+                        text: 'Litres par seconde (l/s)',
+                        color: '#fff'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createWaterConnectionChart() {
+    const ctx = document.getElementById('waterConnectionChart');
+    if (!ctx) return;
+
+    const communes = processedData.communes.map(c => c.name);
+    const branchements = processedData.communes.map(c => c.eau?.["Nombre de branchement EP"] || 0);
+    const raccordements = processedData.communes.map(c => c.eau?.["Nombre de raccordement aux réseaux publics"] || 0);
+    const tauxRaccordement = communes.map((c, i) =>
+        branchements[i] > 0 ? ((raccordements[i] / branchements[i]) * 100).toFixed(1) : 0
+    );
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: communes,
+            datasets: [
+                {
+                    label: 'Taux de Raccordement (%)',
+                    data: tauxRaccordement,
+                    backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                    borderColor: 'rgba(168, 85, 247, 1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#fff' }
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                y: {
+                    ticks: { color: '#fff' },
+                    grid: { color: 'rgba(255,255,255,0.1)' },
+                    min: 0,
+                    max: 100
+                }
+            }
+        }
+    });
+}
+
+function createWaterDecisionMatrixOld() {
+    const container = document.getElementById('waterDecisionMatrix');
+    if (!container) return;
+
+
+
+    // Calculate priority scores for each commune
+    const priorities = processedData.communes.map(commune => {
+        const eau = commune.eau || {};
+        const branchements = eau["Nombre de branchement EP"] || 0;
+        const raccordements = eau["Nombre de raccordement aux réseaux publics"] || 0;
+        const couverture = parseFloat(eau["Taux de couverture en assainissement"] || "0%");
+        const rendementProd = parseFloat(eau["Taux de rendement infrastructure production EP"] || "0%");
+        const rendementDist = parseFloat(eau["Taux de rendement infrastructure distribution EP"] || "0%");
+
+        // Calculate connection rate
+        const tauxRaccordement = branchements > 0 ? (raccordements / branchements) * 100 : 0;
+
+        // Priority score (lower is higher priority)
+        // Prioritize communes with low coverage, low connection rate, or low efficiency
+        const priorityScore = (
+            (100 - couverture) * 0.4 +
+            (100 - tauxRaccordement) * 0.3 +
+            (100 - rendementDist) * 0.2 +
+            (100 - rendementProd) * 0.1
+        );
+
+        return {
+            commune: commune.name,
+            priorityScore,
+            couverture,
+            tauxRaccordement,
+            rendementDist,
+            rendementProd,
+            recommendation: priorityScore > 40 ? '🔴 Urgent' : priorityScore > 25 ? '🟡 Moyen' : '🟢 Bon'
+        };
+    });
+
+    // Sort by priority (highest score = highest priority)
+    priorities.sort((a, b) => b.priorityScore - a.priorityScore);
+
+    // Create decision matrix HTML
+    const html = `
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-white">
+                <thead class="text-xs uppercase bg-white/5 border-b border-white/10">
+                    <tr>
+                        <th class="px-4 py-3 text-left">Commune</th>
+                        <th class="px-4 py-3 text-center">Couverture</th>
+                        <th class="px-4 py-3 text-center">Raccordement</th>
+                        <th class="px-4 py-3 text-center">Rendement</th>
+                        <th class="px-4 py-3 text-center">Priorité</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${priorities.map(p => `
+                        <tr class="border-b border-white/5 hover:bg-white/5 transition">
+                            <td class="px-4 py-3 font-medium">${p.commune}</td>
+                            <td class="px-4 py-3 text-center">${p.couverture.toFixed(1)}%</td>
+                            <td class="px-4 py-3 text-center">${p.tauxRaccordement.toFixed(1)}%</td>
+                            <td class="px-4 py-3 text-center">${p.rendementDist.toFixed(1)}%</td>
+                            <td class="px-4 py-3 text-center font-semibold">${p.recommendation}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+            <div class="text-blue-300 text-xs font-semibold mb-1">💡 Recommandations</div>
+            <div class="text-white/80 text-xs">
+                <strong>${priorities[0].commune}</strong> nécessite une attention prioritaire avec un score de ${priorities[0].priorityScore.toFixed(1)}/100.
+                Focus sur l'amélioration de la couverture (${priorities[0].couverture.toFixed(1)}%) et du taux de raccordement (${priorities[0].tauxRaccordement.toFixed(1)}%).
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+
+// Replacement for createWaterDecisionMatrix - Sanitation Coverage Chart
+function createWaterSanitationChart() {
+    const ctx = document.getElementById('waterDecisionMatrix');
+    if (!ctx) return;
+
+    // Check if we already have a chart instance and destroy it
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+
+    // Ensure we have data
+    if (!processedData || !processedData.communes) return;
+
+    const communes = processedData.communes.map(c => c.name);
+    const couverture = processedData.communes.map(c => {
+        const cov = c.eau?.["Taux de couverture en assainissement"] || "0%";
+        return parseFloat(cov.toString().replace(/%/g, '')) || 0;
+    });
+
+    // Generate colors for each commune
+    const colors = [
+        'rgba(239, 68, 68, 0.8)',   // red
+        'rgba(249, 115, 22, 0.8)',  // orange
+        'rgba(34, 197, 94, 0.8)',   // green
+        'rgba(59, 130, 246, 0.8)',  // blue
+        'rgba(168, 85, 247, 0.8)'   // purple
+    ];
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: communes,
+            datasets: [{
+                label: 'Couverture (%)',
+                data: couverture,
+                backgroundColor: colors,
+                borderColor: colors.map(c => c.replace('0.8', '1')),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        color: '#fff',
+                        padding: 15,
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            return `${label}: ${value}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
