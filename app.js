@@ -2261,6 +2261,10 @@ function renderSanteMarkers() {
   let filtered = AppState.santePoints;
   const f = AppState.santeFilter || "all";
 
+  console.log(`[renderSanteMarkers] Total health points: ${AppState.santePoints?.length || 0}`);
+  console.log(`[renderSanteMarkers] Filter: ${f}`);
+  console.log(`[renderSanteMarkers] Selected commune: ${AppState.selectedCommune ? 'Yes' : 'No (Province level)'}`);
+
   if (f === "all") { }
   else if (f === "ambulance") filtered = filtered.filter(x => x.kind === "ambulance");
   else filtered = filtered.filter(x => x.kind === "essp" && x.subtype === f);
@@ -2270,6 +2274,9 @@ function renderSanteMarkers() {
       try { return turf.booleanPointInPolygon(turf.point([p.lng, p.lat]), AppState.selectedCommune); }
       catch (e) { return false; }
     });
+    console.log(`[renderSanteMarkers] Filtered to commune: ${filtered.length} markers`);
+  } else {
+    console.log(`[renderSanteMarkers] Showing all province markers: ${filtered.length} markers`);
   }
 
   filtered.forEach(p => {
@@ -2291,6 +2298,8 @@ function renderSanteMarkers() {
     const m = L.marker([p.lat, p.lng], { icon: customIcon }).addTo(markersLayer);
     m.bindPopup(fichePopupHTML(p), { maxWidth: 380 });
   });
+
+  console.log(`[renderSanteMarkers] Rendered ${filtered.length} markers on map`);
 }
 
 // Generate education markers based on data.json counts
