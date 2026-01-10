@@ -205,58 +205,51 @@ function fichePopupHTML(d) {
 
   if (d.sector === "emploi" || d.sector === "education" || d.sector === "eau") {
     // Special handling for education markers with student counts
+    // Special handling for education markers with student counts
     if (d.sector === "education") {
       const total = (d.filles || 0) + (d.garcons || 0);
+      const imgPath = d.img || "assets/commune.jpeg"; // Default if missing
+
       return `
-        <div class="text-white" style="min-width:300px; max-width:380px;">
+        <div class="text-white" style="min-width:320px; max-width:400px;">
           <div class="font-semibold text-[16px] mb-3 flex items-center gap-2">
-            <i class="fa-solid ${d.icon} text-white/80"></i>
+            <i class="fa-solid ${d.icon} text-blue-400"></i>
             ${d.title}
           </div>
           
-          <div class="rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-blue-500/20 to-blue-600/10 p-4">
-            <div class="text-center mb-3">
-              <div class="inline-flex items-center justify-center w-16 h-16 rounded-full" style="background:${d.hex}">
-                <i class="fa-solid ${d.icon} text-white text-2xl"></i>
-              </div>
-            </div>
-            
-            <div class="text-center mb-2">
-              <div class="text-white/70 text-xs mb-1">Type d'établissement</div>
-              <div class="font-bold text-lg">${d.title}</div>
-            </div>
-            
-            ${total > 0 ? `
-            <div class="mt-4 space-y-2">
-              <div class="flex items-center justify-between p-2 rounded-lg bg-white/5">
-                <span class="text-white/70 text-sm flex items-center gap-2">
-                  <i class="fa-solid fa-users text-white/60"></i>
-                  Total élèves
-                </span>
-                <span class="font-bold text-lg">${total}</span>
-              </div>
-              
-              <div class="grid grid-cols-2 gap-2">
-                <div class="p-2 rounded-lg bg-pink-500/10 border border-pink-500/20">
-                  <div class="text-pink-300 text-xs mb-1">♀ Filles</div>
-                  <div class="font-bold text-pink-100">${d.filles || 0}</div>
-                </div>
-                <div class="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                  <div class="text-blue-300 text-xs mb-1">♂ Garçons</div>
-                  <div class="font-bold text-blue-100">${d.garcons || 0}</div>
-                </div>
-              </div>
-            </div>
-            ` : `
-            <div class="mt-3 text-center text-white/50 text-sm">
-              <i class="fa-solid fa-info-circle mr-1"></i>
-              Données élèves non disponibles
-            </div>
-            `}
+          ${d.img ? `
+          <div class="rounded-2xl overflow-hidden border border-white/10 bg-white/5 mb-4">
+            <img src="${d.img}" alt="${d.title}"
+              style="width:100%; height:200px; object-fit:cover; display:block;"
+              onerror="this.style.display='none'"/>
+          </div>` : ''}
+          
+          <div class="space-y-3">
+             <div class="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10">
+               <div class="text-white/70 text-sm">
+                 <i class="fa-solid fa-users mr-2 text-blue-400"></i>Total élèves
+               </div>
+               <span class="font-bold text-lg text-white">${total > 0 ? total : 'N/A'}</span>
+             </div>
+             
+             ${total > 0 ? `
+             <div class="grid grid-cols-2 gap-3">
+               <div class="p-2 rounded-lg bg-pink-500/10 border border-pink-500/20 text-center">
+                 <div class="text-pink-300 text-xs mb-1 font-medium">♀ Filles</div>
+                 <div class="font-bold text-pink-100 text-lg">${d.filles || 0}</div>
+               </div>
+               <div class="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-center">
+                 <div class="text-blue-300 text-xs mb-1 font-medium">♂ Garçons</div>
+                 <div class="font-bold text-blue-100 text-lg">${d.garcons || 0}</div>
+               </div>
+             </div>
+             ` : ''}
           </div>
         </div>
       `;
     }
+
+
 
     // Special handling for water (eau) markers
     if (d.sector === "eau" || d.kind === "eau") {
@@ -868,14 +861,23 @@ function renderSectorPanels(sectorKey) {
                 <div class="kpi">
                   <div class="kpi-top">
                     <div>
+                      <div class="kpi-label">Préscolaire</div>
+                      <div class="kpi-value">${communeData["Nombre d'établissements préscolaires"] || 0}</div>
+                    </div>
+                    <div class="kpi-ico"><i class="fa-solid fa-shapes"></i></div>
+                  </div>
+                </div>
+              </div>
+              <div class="kpi-grid mt-3">
+                <div class="kpi">
+                  <div class="kpi-top">
+                    <div>
                       <div class="kpi-label">Écoles Primaires</div>
                       <div class="kpi-value">${communeData["Nombre d'établissements Primaire"] || 0}</div>
                     </div>
                     <div class="kpi-ico"><i class="fa-solid fa-child-reaching"></i></div>
                   </div>
                 </div>
-              </div>
-              <div class="kpi-grid mt-3">
                 <div class="kpi">
                   <div class="kpi-top">
                     <div>
@@ -885,6 +887,8 @@ function renderSectorPanels(sectorKey) {
                     <div class="kpi-ico"><i class="fa-solid fa-book-open"></i></div>
                   </div>
                 </div>
+              </div>
+              <div class="kpi-grid mt-3">
                 <div class="kpi">
                   <div class="kpi-top">
                     <div>
@@ -1103,7 +1107,8 @@ function renderSectorPanels(sectorKey) {
     // PROVINCE-SPECIFIC LOGIC - Tarfaya Province
     if (AppState.selectedProvince && isTarfayaProvince(AppState.selectedProvince)) {
       const d = TARFAYA_DATA.details.education.synthese;
-      const total = d.ecoles_primaires_estimees + d.colleges_estimes + d.lycees_estimes;
+      const prescolaireCount = d.prescolaire_estimes || 10;
+      const total = prescolaireCount + d.ecoles_primaires_estimees + d.colleges_estimes + d.lycees_estimes;
 
       if (leftPanel) leftPanel.innerHTML = `
           <div class="panel-card text-white">
@@ -1128,14 +1133,24 @@ function renderSectorPanels(sectorKey) {
                 <div class="kpi">
                   <div class="kpi-top">
                     <div>
+                     <div class="kpi-label">Préscolaire</div>
+                     <div class="kpi-value">${prescolaireCount}</div>
+                    </div>
+                    <div class="kpi-ico"><i class="fa-solid fa-baby"></i></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-grid mt-3">
+                <div class="kpi">
+                  <div class="kpi-top">
+                    <div>
                          <div class="kpi-label">Écoles Primaires</div>
                         <div class="kpi-value">${d.ecoles_primaires_estimees}</div>
                     </div>
                     <div class="kpi-ico"><i class="fa-solid fa-child-reaching"></i></div>
                   </div>
                 </div>
-              </div>
-              <div class="kpi-grid mt-3">
                  <div class="kpi">
                   <div class="kpi-top">
                     <div>
@@ -1145,6 +1160,9 @@ function renderSectorPanels(sectorKey) {
                     <div class="kpi-ico"><i class="fa-solid fa-book-open"></i></div>
                   </div>
                 </div>
+              </div>
+
+              <div class="kpi-grid mt-3">
                 <div class="kpi">
                   <div class="kpi-top">
                     <div>
@@ -2203,6 +2221,8 @@ function generateRandomSantePointsForProvince(provinceFeature, esspCount = 35, a
   return pts;
 }
 
+
+
 function generateSectorPoints(sector, provinceFeature) {
   if (!isTarfayaProvince(provinceFeature)) return [];
 
@@ -2227,40 +2247,85 @@ function generateSectorPoints(sector, provinceFeature) {
   }
 
   if (sector === "education") {
-    const d = TARFAYA_DATA.details.education;
-    // Specific examples
-    d.exemples_ecoles.forEach(e => {
-      pts.push({
-        id: "edu_ex_" + Math.random(),
-        sector: "education",
-        type: e.type,
-        title: e.nom,
-        nom: e.nom,
-        desc: "Établissement scolaire.",
-        img: "assets/projet.jpg",
-        lat: e.lat, lng: e.lng
-      });
+    // Determine counts from DATA_JSON
+    // We expect: 10 Prim, 5 Col, 2 Lyc
+    // We iterate over communes in DATA_JSON to get specific counts per commune
+    // Then generate that many markers inside that commune's polygon
+
+    const educationSection = DATA_JSON.tables.find(t => t.nom === "EDUCATION");
+    if (!educationSection) return [];
+
+    const communeSections = educationSection.sections.filter(s => s.type.toLowerCase().includes("commune"));
+
+    communeSections.forEach(section => {
+      const d = section.donnees;
+      const communeName = d["Collectivités territoriales"];
+
+      // Find commune geometry
+      // We need to look up in AppState.communesFC or similar. 
+      // Assuming AppState.communesFC is populated.
+      const communeFeature = AppState.communesFC ? AppState.communesFC.features.find(f => {
+        const n = featureName(f);
+        return normalizeName(n) === normalizeName(communeName);
+      }) : null;
+
+      if (!communeFeature) {
+        console.warn("Commune geometry not found for", communeName);
+        return;
+      }
+
+      const cBbox = turf.bbox(communeFeature);
+
+      // Helper to add markers
+      const addMarkers = (count, type, typeKey) => {
+        for (let i = 0; i < count; i++) {
+          // Generate random point inside commune
+          let done = false;
+          let lat, lng;
+          let attempts = 0;
+          while (!done && attempts < 50) {
+            lng = rand(cBbox[0], cBbox[2]);
+            lat = rand(cBbox[1], cBbox[3]);
+            if (turf.booleanPointInPolygon(turf.point([lng, lat]), communeFeature)) done = true;
+            attempts++;
+          }
+          if (!done) continue; // Skip if cant place
+
+          const imgPath = getSchoolImage(communeName, typeKey, i);
+
+          pts.push({
+            id: `edu_${normalizeName(communeName)}_${typeKey}_${i}`,
+            sector: "education",
+            type: typeKey,
+            title: `${type} - ${communeName.replace(/Commune (de |d')/i, '')} ${i + 1}`,
+            nom: `${type} ${i + 1}`, // Simplifies display
+            commune: communeName,
+            // Add student data if available? 
+            // We only have total students for the whole cycle in that commune, not per school.
+            // We'll leave specific counts 0 or estimate? 
+            // Logic in popup handles 0.
+            img: imgPath, // Pass null if no image, popup handles it?
+            lat, lng
+          });
+        }
+      };
+
+      // Counts from DATA_JSON
+      const nbPre = d["Nombre d'établissements préscolaires"] || 0;
+      const nbPrim = d["Nombre d'établissements Primaire"] || 0;
+      const nbCol = d["Nombre d'établissements collège"] || 0;
+      const nbLyc = d["Nombre d'établissements Lycée"] || 0;
+
+      // Note: User asked for 10 Prim, 5 Col, 2 Lyc. 
+      // Plus preschools? User said "18" total (10+5+2=17). 
+      // I will include preschools but focus on the requested ones.
+
+      addMarkers(nbPre, "Préscolaire", "prescolaire");
+      addMarkers(nbPrim, "École Primaire", "primaire");
+      addMarkers(nbCol, "Collège", "college");
+      addMarkers(nbLyc, "Lycée", "lycee");
     });
 
-    // Estimated remaining
-    const total = d.synthese.ecoles_primaires_estimees + d.synthese.colleges_estimes + d.synthese.lycees_estimes;
-    const remainder = total - d.exemples_ecoles.length;
-
-    for (let i = 0; i < remainder; i++) {
-      const lng = rand(bbox[0], bbox[2]);
-      const lat = rand(bbox[1], bbox[3]);
-      if (!turf.booleanPointInPolygon(turf.point([lng, lat]), provinceFeature)) continue;
-      pts.push({
-        id: "edu_rnd_" + i,
-        sector: "education",
-        type: "ecole",
-        title: "École " + (i + 1),
-        nom: "École Primaire/Collège",
-        desc: "Établissement public.",
-        img: "assets/projet.jpg",
-        lat, lng
-      });
-    }
     return pts;
   }
 
@@ -2448,7 +2513,67 @@ function renderSanteMarkers() {
   console.log(`[renderSanteMarkers] Rendered ${filtered.length} markers on map`);
 }
 
-// Generate education markers based on data.json counts
+
+// Helper function to map images to schools
+function getSchoolImages(communeName, type) {
+  const n = normalizeName(communeName);
+  const t = type.toLowerCase();
+
+  const map = {
+    'tarfaya': {
+      'prescolaire': [],
+      'primaire': [
+        'assets/image des ecoles/ecole_primaire_tarfaya_1.png',
+        'assets/image des ecoles/ecole_primaire_tarfaya_2.png',
+        'assets/image des ecoles/ecole_primaire_tarfaya_3.png',
+        'assets/image des ecoles/ecole_primaire_tarfaya_4.png',
+        'assets/image des ecoles/ecole_primaire_tarfaya_5.png',
+        'assets/image des ecoles/ecole_primaire_tarfaya_7.png'
+      ],
+      'college': [
+        'assets/image des ecoles/ecole_College_tarfaya_1.png',
+        'assets/image des ecoles/ecole_College_tarfaya_2.png'
+      ],
+      'lycee': [
+        'assets/image des ecoles/ecole_lycee_tarfaya.png'
+      ]
+    },
+    'akhfennir': {
+      'prescolaire': [],
+      'primaire': ['assets/image des ecoles/ecole_primaire_Akhfennir.png'],
+      'college': [],
+      'lycee': ['assets/image des ecoles/ecole_lycee_Akhfennir.png']
+    },
+    'daoura': {
+      'prescolaire': [],
+      'primaire': ['assets/image des ecoles/ecole_primaire_daoura.png'],
+      'college': ['assets/image des ecoles/ecole_college_daoura.png'],
+      'lycee': []
+    },
+    'tah': {
+      'prescolaire': [],
+      'primaire': [
+        'assets/image des ecoles/ecole_primaire_tah_1.png',
+        'assets/image des ecoles/ecole_primaire_tah_2.png'
+      ],
+      'college': ['assets/image des ecoles/ecole_college_tah.png'],
+      'lycee': []
+    },
+    'el hagounia': {
+      'prescolaire': [], 'primaire': [], 'college': [], 'lycee': []
+    }
+  };
+
+  // Find the key that is contained in the normalized commune name
+  let foundKey = Object.keys(map).find(k => n.includes(k));
+
+  // Hande special cases if necessary (e.g. 'hagounia' matching 'el hagounia')
+  if (!foundKey && n.includes('hagounia')) foundKey = 'el hagounia';
+
+  const images = foundKey ? (map[foundKey][t] || []) : [];
+  return images;
+}
+
 function generateEducationMarkers(provinceFeature, communeFeature = null) {
   const markers = [];
 
@@ -2482,26 +2607,36 @@ function generateEducationMarkersForCommune(communeFeature) {
   const markers = [];
   const communeName = featureName(communeFeature);
 
-  let cleanName = communeName;
-  if (cleanName.toLowerCase().startsWith("commune de ")) {
-    cleanName = cleanName.substring(11);
-  } else if (cleanName.toLowerCase().startsWith("commune d'")) {
-    cleanName = cleanName.substring(10);
-  }
+  // Use getCommuneEducationData to fetch directly from DATA_JSON
+  const eduData = getCommuneEducationData(communeName);
+  const nKey = normalizeName(communeName);
 
-  const nKey = normalizeName(cleanName);
-  const eduData = AppState.importedData?.[nKey]?.edu;
-
-  console.log(`[generateEducationMarkersForCommune] Commune: ${communeName}, nKey: ${nKey}`);
-  console.log(`[generateEducationMarkersForCommune] eduData:`, eduData);
+  console.log(`[generateEducationMarkersForCommune] Commune: ${communeName}`);
 
   if (!eduData) {
-    console.warn(`[generateEducationMarkersForCommune] No education data found for ${communeName}`);
+    console.warn(`[generateEducationMarkersForCommune] No education data found for ${communeName} in DATA_JSON`);
     return markers;
   }
 
-  // Generate markers for each education level
-  // The data structure is: edu.prescolaire.etabs, edu.primaire.etabs, etc.
+  // Parse counts from DATA_JSON keys
+  // Keys: "Nombre d'établissements préscolaires", "Nombre d'établissements Primaire", 
+  // "Nombre d'établissements collège", "Nombre d'établissements Lycée"
+  // Student counts: "Nombre des élèves Préscolaire -Fille-", etc.
+
+  const counts = {
+    prescolaire: eduData["Nombre d'établissements préscolaires"] || 0,
+    primaire: eduData["Nombre d'établissements Primaire"] || 0,
+    college: eduData["Nombre d'établissements collège"] || 0,
+    lycee: eduData["Nombre d'établissements Lycée"] || 0
+  };
+
+  const students = {
+    prescolaire: { filles: eduData["Nombre des élèves Préscolaire -Fille-"] || 0, garcons: eduData["Nombre des élèves Préscolaire -Garçon-"] || 0 },
+    primaire: { filles: eduData["Nombre des élèves Primaire -Fille-"] || 0, garcons: eduData["Nombre des élèves Primaire -Garçon-"] || 0 },
+    college: { filles: eduData["Nombre des élèves collège -Fille-"] || 0, garcons: eduData["Nombre des élèves collège -Garçon-"] || 0 },
+    lycee: { filles: eduData["Nombre des élèves Lycée -Fille-"] || 0, garcons: eduData["Nombre des élèves Lycée -Garçon-"] || 0 }
+  };
+
   const levels = [
     { key: "prescolaire", type: "prescolaire" },
     { key: "primaire", type: "primaire" },
@@ -2510,18 +2645,37 @@ function generateEducationMarkersForCommune(communeFeature) {
   ];
 
   levels.forEach(level => {
-    const count = eduData[level.key]?.etabs || 0;
+    const count = counts[level.key];
     console.log(`[generateEducationMarkersForCommune] ${level.type}: ${count} schools`);
+
+    // Get images for this commune and type
+    const availableImages = getSchoolImages(communeName, level.type);
 
     for (let i = 0; i < count; i++) {
       const pt = randomPointInPoly(communeFeature);
       if (pt) {
         const conf = EDUCATION_CONFIG[level.type];
+
+        // Assign image: use available images cyclically, or fallback to default
+        let img = null; // Default to null
+        if (availableImages && availableImages.length > 0) {
+          img = availableImages[i % availableImages.length];
+        } else {
+          // Optional: if no image for this level, maybe try to grab *any* image from the commune?
+          // For now, default to commune.jpeg is safer than hidden.
+        }
+
+        // Calculate student count per school (approximate average if multiple schools)
+        // Or assign total to the first one? Average is better.
+        const filles = Math.floor(students[level.key].filles / count);
+        const garcons = Math.floor(students[level.key].garcons / count);
+
         const marker = {
           id: `edu_${level.type}_${nKey}_${i}`,
           sector: "education",
           type: level.type,
-          title: `${conf.label} - ${communeName}`,
+          title: `${conf.label} - ${communeName} ${i + 1}`,
+          nom: `${conf.label} ${communeName} ${i + 1}`, // Ensure 'nom' is set for popup
           commune: communeName,
           icon: conf.icon,
           hex: conf.hex,
@@ -2529,20 +2683,21 @@ function generateEducationMarkersForCommune(communeFeature) {
           lng: pt.geometry.coordinates[0],
           desc: `Établissement ${conf.label} à ${communeName}`,
           kind: "education",
-          filles: eduData[level.key]?.filles || 0,
-          garcons: eduData[level.key]?.garcons || 0
+          img: img,
+          filles: filles,
+          garcons: garcons,
+          schoolCounts: counts
         };
         markers.push(marker);
-        console.log(`[generateEducationMarkersForCommune] Created marker:`, marker);
       } else {
         console.warn(`[generateEducationMarkersForCommune] Failed to generate point for ${level.type} #${i}`);
       }
     }
   });
 
-  console.log(`[generateEducationMarkersForCommune] Total markers created for ${communeName}: ${markers.length}`);
   return markers;
 }
+
 
 // Generate water infrastructure markers based on data.js
 function generateWaterMarkers(provinceFeature, communeFeature = null) {
